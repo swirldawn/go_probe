@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"html/template"
+	//"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -54,7 +54,7 @@ func getAll() []string {
 		port := value.Get("port").String()
 		fmt.Println("http://" + ip + ":" + port + "/get_status")
 		html_text := gocore.HttpGet("http://" + ip + ":" + port + "/get_status")
-
+		html_text = "ip:" + ip + "|" + html_text
 		re = append(re, html_text)
 
 		return true // keep iterating
@@ -67,11 +67,13 @@ func main() {
 	http.HandleFunc("/get_status", getLocalStatus)
 	http.HandleFunc("/get_all_status", getAllStatus)
 	http.HandleFunc("/index", func(res http.ResponseWriter, req *http.Request) {
-		t, err := template.ParseFiles("index.html")
-		if err != nil {
-			fmt.Println("err")
-		}
-		t.Execute(res, nil)
+		// t, err := template.ParseGlob("./index.html")
+		// if err != nil {
+		// 	fmt.Println("err")
+		// }
+		// t.Execute(res, nil)
+		config, _ := ReadText("./index.html")
+		fmt.Fprintln(res, string(config))
 	})
 	http.ListenAndServe(":8084", nil)
 	// aa := getAll()

@@ -5,41 +5,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="https://lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+    <link href="https://fonts.loli.net/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css">
+    <link href="https://lib.baomitu.com/quasar-framework/0.16.0/quasar.mat.min.css" rel="stylesheet">
+    <script src="https://lib.baomitu.com/vue/2.6.10/vue.min.js"></script>
+    <script src="https://lib.baomitu.com/quasar-framework/0.16.0/quasar.mat.umd.min.js"></script>
+    <script src="https://lib.baomitu.com/quasar-framework/0.16.0/i18n.zh-hans.umd.min.js"></script>
+    <script src="https://lib.baomitu.com/axios/0.19.0-beta.1/axios.min.js"></script>
 
-    <title></title>
+    <title>Golang探针(swirl)</title>
+    <style>
+        body {
+            background-color: #E0E3DA;
+        }
+        
+        .q-list {
+            background-color: #fff;
+        }
+    </style>
 </head>
-<style>
-    body {
-        background-color: #d9d9f3;
-    }
-    
-    .content {
-        margin: 0 auto;
-        max-width: 1100px;
-        background-color: #96ceb4;
-        height: 590px;
-    }
-    
-    .text {
-        width: 500px;
-        height: 30px;
-    }
-</style>
 
 <body>
-    <div class="content">
-        <input type="text" id="url_str" class="text">
-        <button id="btn">提交</button><br>
-        <textarea id="json_input" name="json_input" class="col-md-12 form-control" cols="100" rows='5' style="font-size: 11px !important;" spellcheck="false"></textarea>
-        <div id="video_content">
+    <div id="q-app">
 
-        </div>
+        <q-layout view="lHh Lpr fff">
+
+
+            <my-page></my-page>
+        </q-layout>
     </div>
 
-</body>
-<script>
- 
-</script>
 
-</html>
+    <script type="text/x-template" id="my-page">
+
+
+        <div style="margin:5px auto;max-width:1100px;" class="fixed-top">
+
+            <q-tabs v-model="tabsModel">
+                <q-tab :name="item.label" slot="title" v-for="item in tabsOptions" :label="item.label" />
+
+
+                <q-tab-pane :name="item.ip" v-for="item in list">
+                    <q-card>
+                        <q-card-title v-text="item.version">
+
+                        </q-card-title>
+
+                        <q-card-separator />
+
+                        <q-list>
+                            <q-item>
+                                <q-item-side>
+                                    <q-item-tile color="primary" icon="local bar" />
+                                </q-item-side>
+                                <q-item-main>
+                                    <q-item-tile label>CPU</q-item-tile>
+                                    <q-item-tile sublabel v-text="item.cpu"> </q-item-tile>
+                                </q-item-main>
+                            </q-item>
+                            <q-item>
+                                <q-item-side>
+                                    <q-item-tile color="red" icon="local gas station" />
+                                </q-item-side>
+                                <q-item-main>
+                                    <q-item-tile label>内存</q-item-tile>
+                                    <q-item-tile sublabel v-text="item.mem"></q-item-tile>
+                                </q-item-main>
+                            </q-item>
+                            <q-item>
+                                <q-item-side>
+                                    <q-item-tile color="amber" icon="local movies" />
+                                </q-item-side>
+                                <q-item-main>
+                                    <q-item-tile label>硬盘</q-item-tile>
+                                    <q-item-tile sublabel v-text="item.disk"></q-item-tile>
+                                </q-item-main>
+                            </q-item>
+                        </q-list>
+                    </q-card>
+                </q-tab-pane>
+            </q-tabs>
+        </div>
+
+
+    </script>
+    <script>
+        Vue.component('my-page', {
+            template: '#my-page',
+            data() {
+                return {
+                    tabsModel: 'xtab-2',
+                    tabsOptions: [{
+                        label: 'Tab 1',
+                        value: 'xtab-1'
+                    }, {
+                        label: 'Tab 2',
+                        value: 'xtab-2'
+                    }, {
+                        label: 'Tab 3',
+                        value: 'xtab-3'
+                    }],
+                    list: [],
+                    all_status_str: ""
+                }
+            },
+            methods: {
+                launch: function(url) {
+                    Quasar.utils.openURL(url)
+                },
+                handelList() {
+                    var list = this.all_status_str.split("#")
+                    var list_arr = new Array()
+                    var title_list = new Array()
+                    for (var i = 0; i < list.length; i++) {
+                        var re = list[i].split("|");
+                        var data = {};
+                        data.ip = re[0];
+                        data.disk = re[1];
+                        data.cpu = re[2];
+                        data.mem = re[3];
+                        data.version = re[4];
+                        list_arr.push(data);
+                    }
+                    for (var i = 0; i < list_arr.length; i++) {
+                        var data = {};
+                        data.label = list_arr[i]['ip']
+                        title_list.push(data)
+                    }
+                    this.tabsOptions = title_list
+                    this.tabsModel = title_list[0].label
+                    this.list = list_arr
+                    console.log(title_list[0]);
+                },
+                getList() {
+                    axios.get(`/get_all_status`).then(({
+                        data
+                    }) => {
+                        this.all_status_str = data;
+                        console.log(data)
+                        this.handelList();
+                    })
+
+                }
+
+            },
+            mounted() {
+                // this.$refs.server_search.focus();
+
+            },
+            created() {
+                //this.handelList();
+                this.getList();
+            }
+        });
+    </script>
+    <script>
+        var vue = new Vue({
+            el: '#q-app',
+            data: function() {
+                return {
+
+                }
+            },
+            methods: {
+
+
+            },
+            created() {
+
+            },
+            watch: {
+
+            },
+
+        })
+    </script>
+
+</body>
+
+</html
