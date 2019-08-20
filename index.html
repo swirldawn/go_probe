@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+
+    <title>西瓜视频和爱奇艺片花视频下载</title>
+</head>
+<style>
+    body {
+        background-color: #d9d9f3;
+    }
+    
+    .content {
+        margin: 0 auto;
+        max-width: 1100px;
+        background-color: #96ceb4;
+        height: 590px;
+    }
+    
+    .text {
+        width: 500px;
+        height: 30px;
+    }
+</style>
+
+<body>
+    <div class="content">
+        <input type="text" id="url_str" class="text">
+        <button id="btn">提交</button><br>
+        <textarea id="json_input" name="json_input" class="col-md-12 form-control" cols="100" rows='5' style="font-size: 11px !important;" spellcheck="false"></textarea>
+        <div id="video_content">
+
+        </div>
+    </div>
+
+</body>
+<script>
+    $("#btn").click(function() {
+        var url = $("#url_str").val();
+        if (url == "") {
+            return false;
+        }
+        $.get("url_resolv?url_str=" + url, function(data) {
+            console.log(data);
+
+            var data_html = JSON.stringify(data, null, 4);
+            $('#json_input').val(data_html)
+            var video_html = '<video width="720px" controls>' +
+                '<source src="http://212.64.83.150:8038/' + data.data + '" type="video/mp4"> </video>';
+
+            $("#video_content").html(video_html);
+        });
+    });
+</script>
+
+</html>
