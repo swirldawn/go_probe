@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
 
-    <title>西瓜视频和爱奇艺片花视频下载</title>
+    <title></title>
 </head>
 <style>
     body {
@@ -39,22 +39,7 @@
 
 </body>
 <script>
-    $("#btn").click(function() {
-        var url = $("#url_str").val();
-        if (url == "") {
-            return false;
-        }
-        $.get("url_resolv?url_str=" + url, function(data) {
-            console.log(data);
-
-            var data_html = JSON.stringify(data, null, 4);
-            $('#json_input').val(data_html)
-            var video_html = '<video width="720px" controls>' +
-                '<source src="http://212.64.83.150:8038/' + data.data + '" type="video/mp4"> </video>';
-
-            $("#video_content").html(video_html);
-        });
-    });
+ 
 </script>
 
 </html>

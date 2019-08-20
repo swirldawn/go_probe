@@ -3,17 +3,25 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"html/template"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
-	//"github.com/tidwall/gjson"
+
+	"github.com/swirldawn/gocore"
+	"github.com/tidwall/gjson"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
+func getLocalStatus(w http.ResponseWriter, r *http.Request) {
 	re := getLocal()
 	fmt.Fprintln(w, re)
+}
+func getAllStatus(w http.ResponseWriter, r *http.Request) {
+	re := getAll()
+	fmt.Fprintln(w, strings.Join(re, "#"))
 }
 
 //获取本服务器的
@@ -26,16 +34,48 @@ func getLocal() string {
 	re := disk + "|" + cpu_mem + "|" + version
 	return re
 }
+func ReadText(filePth string) ([]byte, error) {
+	f, err := os.Open(filePth)
+	if err != nil {
+		return nil, err
+	}
+
+	return ioutil.ReadAll(f)
+}
 
 //获取其他服务器的
 func getAll() []string {
+	config, _ := ReadText("./.config")
+
+	config_json := gjson.Parse(string(config))
+	re := make([]string, 0)
+	config_json.ForEach(func(key, value gjson.Result) bool {
+		ip := value.Get("ip").String()
+		port := value.Get("port").String()
+		fmt.Println("http://" + ip + ":" + port + "/get_status")
+		html_text := gocore.HttpGet("http://" + ip + ":" + port + "/get_status")
+
+		re = append(re, html_text)
+
+		return true // keep iterating
+	})
+	return re
 
 }
 
 func main() {
-	http.HandleFunc("/get_local", IndexHandler)
+	http.HandleFunc("/get_status", getLocalStatus)
+	http.HandleFunc("/get_all_status", getAllStatus)
+	http.HandleFunc("/index", func(res http.ResponseWriter, req *http.Request) {
+		t, err := template.ParseFiles("index.html")
+		if err != nil {
+			fmt.Println("err")
+		}
+		t.Execute(res, nil)
+	})
 	http.ListenAndServe("127.0.0.1:8084", nil)
-
+	// aa := getAll()
+	// fmt.Println(aa)
 }
 
 //获取系统发行版本
