@@ -73,7 +73,7 @@ func main() {
 		}
 		t.Execute(res, nil)
 	})
-	http.ListenAndServe("127.0.0.1:8084", nil)
+	http.ListenAndServe(":8084", nil)
 	// aa := getAll()
 	// fmt.Println(aa)
 }

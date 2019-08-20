@@ -1,4 +1,4 @@
 ### 运行
 ```
-nohup ./main >> /tmp/log.log 2>&1 &
+nohup ./main >> /tmp/go.log 2>&1 &
 ```
