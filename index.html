@@ -41,8 +41,9 @@
 
         var re = value.split(":");
         var result = re[1];
-        result.replace(/k/g, "");
-        var data = re[1].split(",");
+        result = result.replace(/k/g, "");
+        console.log(result)
+        var data = result.split(",");
         var total = 0;
         var free = 0;
         var used = 0;
@@ -272,7 +273,6 @@
                     this.tabsOptions = title_list
                     this.tabsModel = title_list[0].label
                     this.list = list_arr
-                    console.log(list_arr)
 
                 },
                 getList() {
