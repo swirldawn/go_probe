@@ -31,11 +31,15 @@
     function Binary(num) {
         var re = 0;
         if ((num / 1024) > 1024) { //是g
-            re = parseInt((num / 1024 / 1024)) + "G"
-            return re;
+            re = (num / 1024 / 1024) + "";
+            result = re.substr(0, re.indexOf(".") + 3);
+            result = result + "G"
+            return result;
         }
-        re = parseInt((num / 1024)) + "M"
-        return re;
+        re = (num / 1024) + "";
+        result = re.substr(0, re.indexOf(".") + 3);
+        result = result + "M"
+        return result;
     }
     Vue.filter('mem', function(value) {
 
