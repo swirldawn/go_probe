@@ -45,16 +45,21 @@ func ReadText(filePth string) ([]byte, error) {
 
 //获取其他服务器的
 func getAll() []string {
-	config, _ := ReadText("./.config")
-
+	config, err := ReadText("./.config")
+	if err!=nil{
+		fmt.Println(err)
+	}
+	fmt.Println(string(config))
 	config_json := gjson.Parse(string(config))
 	re := make([]string, 0)
 	config_json.ForEach(func(key, value gjson.Result) bool {
+		
+		label := value.Get("name").String()
 		ip := value.Get("ip").String()
 		port := value.Get("port").String()
 		fmt.Println("http://" + ip + ":" + port + "/get_status")
 		html_text := gocore.HttpGet("http://" + ip + ":" + port + "/get_status")
-		html_text = "ip:" + ip + "|" + html_text
+		html_text = "name:"+label+"|ip:" + ip + "|" + html_text
 		re = append(re, html_text)
 
 		return true // keep iterating

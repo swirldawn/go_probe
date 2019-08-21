@@ -15,14 +15,89 @@
     <title>Golang探针(swirl)</title>
     <style>
         body {
-            background-color: #E0E3DA;
+            background-color: #348498;
         }
         
         .q-list {
             background-color: #fff;
         }
+        
+        .q-item-label {
+            color: #004d61;
+        }
     </style>
 </head>
+<script>
+    function Binary(num) {
+        var re = 0;
+        if ((num / 1024) > 1024) { //是g
+            re = parseInt((num / 1024 / 1024)) + "G"
+            return re;
+        }
+        re = parseInt((num / 1024)) + "M"
+        return re;
+    }
+    Vue.filter('mem', function(value) {
+        var re = value.split(":");
+        var result = re[1];
+        var data = re[1].split(",");
+        var total = 0;
+        var free = 0;
+        var used = 0;
+        var cache = 0;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].indexOf("total") != -1) {
+                total = data[i].replace("total", "");
+                total = Binary(total);
+            }
+            if (data[i].indexOf("free") != -1) {
+                free = data[i].replace("free", "");
+                free = Binary(free);
+            }
+            if (data[i].indexOf("used") != -1) {
+                used = data[i].replace("used", "");
+                used = Binary(used);
+            }
+            if (data[i].indexOf("cache") != -1) {
+                cache = data[i].replace("buff/cache", "");
+                cache = Binary(cache);
+            }
+        }
+        var text = "总内存:" + total + ",空闲:" + free + ",已使用:" + used + ",缓存:" + cache
+        return text;
+    });
+    Vue.filter('cpu', function(value) {
+        var re = value.split(":");
+        var result = re[1];
+        var data = re[1].split(",");
+        var sys = 0;
+        var free = 0;
+        var used = 0;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].indexOf("用户使用") != -1) {
+                used = data[i].replace("用户使用", "");
+                used = used + "%";
+            }
+            if (data[i].indexOf("系统使用") != -1) {
+                sys = data[i].replace("系统使用", "");
+                sys = sys + "%";
+            }
+            if (data[i].indexOf("空闲") != -1) {
+                free = data[i].replace("空闲", "");
+                free = free + "%";
+            }
+
+        }
+        var text = "用户使用:" + used + ",系统使用:" + sys + ",空闲:" + free
+        return text;
+    });
+    Vue.filter('disk', function(value) {
+        var re = value.split(":");
+        var result = re[1];
+
+        return result;
+    });
+</script>
 
 <body>
     <div id="q-app">
@@ -38,52 +113,74 @@
     <script type="text/x-template" id="my-page">
 
 
-        <div style="margin:5px auto;max-width:1100px;" class="fixed-top">
+        <div style="margin:5px auto;max-width:1400px;" class="fixed-top">
+            <q-table title="Golang探针" :data="list" :columns="columns" row-key="name" v-show="false">
 
-            <q-tabs v-model="tabsModel">
-                <q-tab :name="item.label" slot="title" v-for="item in tabsOptions" :label="item.label" />
+                <q-td slot="body-cell-name" slot-scope="props" :props="props">
+                    {{ props.row.name |disk }}
+                </q-td>
+
+                <q-td slot="body-cell-cpu" slot-scope="props" :props="props">
+                    {{ props.row.cpu |cpu }}
+                </q-td>
+                <q-td slot="body-cell-mem" slot-scope="props" :props="props">
+                    {{ props.row.mem |mem }}
+                </q-td>
+                <q-td slot="body-cell-disk" slot-scope="props" :props="props">
+                    {{ props.row.disk |disk }}
+                </q-td>
+            </q-table>
 
 
-                <q-tab-pane :name="item.ip" v-for="item in list">
-                    <q-card>
-                        <q-card-title v-text="item.version">
 
-                        </q-card-title>
 
-                        <q-card-separator />
+            <q-card v-for="item in list" color="teal-8">
+                <q-card-title>
+                    {{item.name | disk }} {{item.version }}
+                </q-card-title>
 
-                        <q-list>
-                            <q-item>
-                                <q-item-side>
-                                    <q-item-tile color="primary" icon="local bar" />
-                                </q-item-side>
-                                <q-item-main>
-                                    <q-item-tile label>CPU</q-item-tile>
-                                    <q-item-tile sublabel v-text="item.cpu"> </q-item-tile>
-                                </q-item-main>
-                            </q-item>
-                            <q-item>
-                                <q-item-side>
-                                    <q-item-tile color="red" icon="local gas station" />
-                                </q-item-side>
-                                <q-item-main>
-                                    <q-item-tile label>内存</q-item-tile>
-                                    <q-item-tile sublabel v-text="item.mem"></q-item-tile>
-                                </q-item-main>
-                            </q-item>
-                            <q-item>
-                                <q-item-side>
-                                    <q-item-tile color="amber" icon="local movies" />
-                                </q-item-side>
-                                <q-item-main>
-                                    <q-item-tile label>硬盘</q-item-tile>
-                                    <q-item-tile sublabel v-text="item.disk"></q-item-tile>
-                                </q-item-main>
-                            </q-item>
-                        </q-list>
-                    </q-card>
-                </q-tab-pane>
-            </q-tabs>
+                <q-card-separator />
+
+                <q-list>
+
+                    <q-item>
+                        <q-item-side>
+                            <q-item-tile color="primary-7" icon="place" />
+                        </q-item-side>
+                        <q-item-main>
+                            <q-item-tile label>ip</q-item-tile>
+                            <q-item-tile sublabel v-text="item.ip"> </q-item-tile>
+                        </q-item-main>
+                    </q-item>
+                    <q-item>
+                        <q-item-side>
+                            <q-item-tile color="primary" icon="gamepad" />
+                        </q-item-side>
+                        <q-item-main>
+                            <q-item-tile label>CPU</q-item-tile>
+                            <q-item-tile sublabel> {{item.cpu|cpu}}</q-item-tile>
+                        </q-item-main>
+                    </q-item>
+                    <q-item>
+                        <q-item-side>
+                            <q-item-tile color="red" icon="sd_storage" />
+                        </q-item-side>
+                        <q-item-main>
+                            <q-item-tile label>内存</q-item-tile>
+                            <q-item-tile sublabel>{{item.mem | mem}}</q-item-tile>
+                        </q-item-main>
+                    </q-item>
+                    <q-item>
+                        <q-item-side>
+                            <q-item-tile color="amber" icon="save" />
+                        </q-item-side>
+                        <q-item-main>
+                            <q-item-tile label>硬盘</q-item-tile>
+                            <q-item-tile sublabel>{{item.disk |disk}}</q-item-tile>
+                        </q-item-main>
+                    </q-item>
+                </q-list>
+            </q-card>
         </div>
 
 
@@ -104,8 +201,45 @@
                         label: 'Tab 3',
                         value: 'xtab-3'
                     }],
+                    columns: [{
+                        name: 'name',
+                        required: true,
+                        label: '名称',
+                        align: 'left',
+                        field: 'name',
+                    }, {
+                        name: 'version',
+                        required: true,
+                        label: '系统',
+                        align: 'left',
+                        field: 'version',
+                    }, {
+                        name: 'cpu',
+                        required: true,
+                        label: 'cpu',
+                        align: 'left',
+                        field: 'cpu',
+                    }, {
+                        name: 'disk',
+                        required: true,
+                        label: '硬盘',
+                        align: 'left',
+                        field: 'disk',
+                    }, {
+                        name: 'mem',
+                        required: true,
+                        label: '内存',
+                        align: 'left',
+                        field: 'mem',
+                    }, {
+                        name: 'ip',
+                        required: true,
+                        label: 'ip',
+                        align: 'left',
+                        field: 'ip',
+                    }, ],
                     list: [],
-                    all_status_str: ""
+                    all_status_str: "name:本地|ip:127.0.0.1|disk:磁盘总量466Gi,已使用257Gi,剩余205Gi,使用率56%|cpu:0.4用户使用,0.5系统使用,0.0ni,99.1空闲,0.0wa,0.0hi,0.0si,0.0st|mem:516496total,62732free,57264used,396500buff/cache|CentOS release 6.5 (Final)#name:加拿大|ip:104.129.182.116|disk:磁盘总量11G,已使用2.0G,剩余8.0G,使用率20%|cpu:0.4用户使用,0.5系统使用,0.0ni,99.1空闲,0.0wa,0.0hi,0.0si,0.0st|mem:516496total,50452free,54516used,411528buff/cache|Ubuntu 16.04.2 LTS \n \l"
                 }
             },
             methods: {
@@ -119,29 +253,30 @@
                     for (var i = 0; i < list.length; i++) {
                         var re = list[i].split("|");
                         var data = {};
-                        data.ip = re[0];
-                        data.disk = re[1];
-                        data.cpu = re[2];
-                        data.mem = re[3];
-                        data.version = re[4];
+                        data.name = re[0];
+                        data.ip = re[1];
+                        data.disk = re[2];
+                        data.cpu = re[3];
+                        data.mem = re[4];
+                        data.version = re[5];
                         list_arr.push(data);
                     }
                     for (var i = 0; i < list_arr.length; i++) {
                         var data = {};
-                        data.label = list_arr[i]['ip']
+                        data.label = list_arr[i]['name']
                         title_list.push(data)
                     }
                     this.tabsOptions = title_list
                     this.tabsModel = title_list[0].label
                     this.list = list_arr
-                    console.log(title_list[0]);
+                    console.log(list_arr)
+
                 },
                 getList() {
                     axios.get(`/get_all_status`).then(({
                         data
                     }) => {
                         this.all_status_str = data;
-                        console.log(data)
                         this.handelList();
                     })
 
@@ -153,7 +288,7 @@
 
             },
             created() {
-                //this.handelList();
+                // this.handelList();
                 this.getList();
             }
         });
