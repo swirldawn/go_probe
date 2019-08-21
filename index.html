@@ -41,8 +41,8 @@
 
         var re = value.split(":");
         var result = re[1];
+        result.replace(/k/g, "");
         var data = re[1].split(",");
-        data = data.replace(/k/g, "");
         var total = 0;
         var free = 0;
         var used = 0;
