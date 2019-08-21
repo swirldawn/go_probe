@@ -63,7 +63,7 @@
             }
             if (data[i].indexOf("cache") != -1 || data[i].indexOf("buffers") != -1) {
                 cache = data[i].replace("buff/cache", "");
-                cache = data[i].replace("buffers", "");
+                cache = cache.replace("buffers", "");
                 cache = Binary(cache);
             }
         }
