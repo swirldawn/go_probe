@@ -95,6 +95,9 @@ Kernel \r on an \m
 		`
 	} else {
 		str, _ = exec_shell("cat /etc/issue")
+		if strings.Contains(str, "Ubuntu")==false{
+			str, _ = exec_shell("cat /etc/redhat-release")
+		}
 	}
 	s := strings.Split(str, "\n")
 	return s[0]
