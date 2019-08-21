@@ -38,9 +38,11 @@
         return re;
     }
     Vue.filter('mem', function(value) {
+
         var re = value.split(":");
         var result = re[1];
         var data = re[1].split(",");
+        data = data.replace(/k/g, "");
         var total = 0;
         var free = 0;
         var used = 0;
@@ -58,8 +60,9 @@
                 used = data[i].replace("used", "");
                 used = Binary(used);
             }
-            if (data[i].indexOf("cache") != -1) {
+            if (data[i].indexOf("cache") != -1 || data[i].indexOf("buffers") != -1) {
                 cache = data[i].replace("buff/cache", "");
+                cache = data[i].replace("buffers", "");
                 cache = Binary(cache);
             }
         }
