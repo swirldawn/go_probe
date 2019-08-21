@@ -142,9 +142,9 @@
 
 
 
-            <q-card v-for="item in list" color="teal-8">
+            <q-card v-for="(item, index) in list" color="teal-8">
                 <q-card-title>
-                    {{item.name | disk }} {{item.version }}
+                    {{index+1}}.{{item.name | disk }} {{item.version }}
                 </q-card-title>
 
                 <q-card-separator />
